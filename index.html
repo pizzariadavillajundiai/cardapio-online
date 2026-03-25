@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizzaria da Villa - Jundiai V4 🍕</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body { background: #c0392b; margin: 0; font-family: Arial; }
+.header { position: sticky; top: 0; background: #c0392b; color: white; text-align: center; padding: 15px; font-size: 20px; font-weight: bold; }
+.container-box { max-width: 600px; margin: auto; padding: 15px; }
+.card { border-radius: 16px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+input, select { height: 50px; font-size: 16px; }
+.btn { height: 55px; font-size: 18px; border-radius: 12px; }
+.hidden { display: none; }
+</style>
+
+<script>
+
+// ==============================
+// 📦 DADOS
+// ==============================
+
+const SABORES = [
+{cod:0,nome:"Escolha o sabor...",preco:0},
+{cod:1,nome:"1 Queijo",preco:56},{cod:2,nome:"2 Queijos",preco:60},
+{cod:3,nome:"3 Queijos",preco:65},{cod:4,nome:"4 Queijos",preco:65},
+{cod:5,nome:"Margherita",preco:57},{cod:6,nome:"Alho e Óleo",preco:57},
+{cod:7,nome:"Alemã",preco:53},{cod:8,nome:"Calabresa I",preco:55},
+{cod:9,nome:"Calabresa II",preco:61},{cod:10,nome:"Baiana",preco:55},
+{cod:11,nome:"Mineira",preco:68},{cod:12,nome:"Calina",preco:69},
+{cod:13,nome:"Forneira",preco:55},{cod:14,nome:"Francat",preco:57},
+{cod:15,nome:"Franche",preco:57},{cod:16,nome:"Caipira",preco:68},
+{cod:17,nome:"Franbrócolis",preco:66},{cod:18,nome:"Lombo I",preco:65},
+{cod:19,nome:"Lombo II",preco:66},{cod:20,nome:"A Moda da casa",preco:70},
+{cod:21,nome:"Milano",preco:66},{cod:22,nome:"Di Nápoli",preco:75},
+{cod:23,nome:"Bauru",preco:55},{cod:24,nome:"Portuguesa",preco:65},
+{cod:25,nome:"Da Villa",preco:58},{cod:26,nome:"Americana",preco:65},
+{cod:27,nome:"Cinderela",preco:70},{cod:28,nome:"Peito de Peru",preco:67},
+{cod:29,nome:"Pepperoni",preco:50},{cod:30,nome:"Bacon",preco:62},
+{cod:31,nome:"Atum",preco:55},{cod:32,nome:"Chilena",preco:70},
+{cod:33,nome:"Brócolis",preco:63},{cod:34,nome:"Palmito",preco:65},
+{cod:35,nome:"Palmibacon",preco:70},{cod:36,nome:"Abobrinha",preco:57},
+{cod:37,nome:"Vegetariana I",preco:62},{cod:38,nome:"Vegetariana II",preco:66},
+{cod:39,nome:"Hot Dog I",preco:60},{cod:40,nome:"Hot Dog II",preco:60},
+{cod:41,nome:"Batata Frita",preco:70},{cod:42,nome:"4 Carnes",preco:70},
+{cod:43,nome:"Costela",preco:72},{cod:44,nome:"Carne Seca",preco:70},
+{cod:45,nome:"Firenze",preco:65},{cod:46,nome:"Brigadeiro",preco:60},
+{cod:47,nome:"Prestígio",preco:60},{cod:48,nome:"M&M",preco:60},
+{cod:49,nome:"Chocomorango",preco:65},{cod:50,nome:"Banana Nevada",preco:65}
+];
+
+const BORDAS = [
+{cod:0,nome:"Sem Borda",preco:0},
+{cod:100,nome:"Borda Catupiry",preco:15},
+{cod:102,nome:"Borda Cream Cheese",preco:12},
+{cod:103,nome:"Borda Cheddar",preco:12},
+{cod:104,nome:"Borda Chocolate",preco:12}
+];
+
+const REFRIS = [
+{cod:200,nome:"Não quero refrigerante",preco:0},
+{cod:201,nome:"Coca Cola 2L",preco:15},
+{cod:202,nome:"Coca Cola Zero 2L",preco:15},
+{cod:204,nome:"Coca Cola 1L",preco:9}
+];
+
+// ==============================
+// ⚙️ FUNÇÕES
+// ==============================
+
+function opcoesSabores(){
+    return SABORES.map(s=>`<option value="${s.cod}">
+    ${s.nome} - R$ ${s.preco.toFixed(2).replace('.',',')}
+    </option>`).join("");
+}
+
+function opcoesBordas(){
+    return BORDAS.map(b=>`<option value="${b.cod}">
+    ${b.nome} - R$ ${b.preco.toFixed(2).replace('.',',')}
+    </option>`).join("");
+}
+
+function opcoesRefri(){
+    return REFRIS.map(r=>`<option value="${r.cod}">
+    ${r.nome} - R$ ${r.preco.toFixed(2).replace('.',',')}
+    </option>`).join("");
+}
+
+function getSabor(cod){ return SABORES.find(s=>s.cod==cod); }
+function getBorda(cod){ return BORDAS.find(b=>b.cod==cod); }
+function getRefri(cod){ return REFRIS.find(r=>r.cod==cod); }
+
+// ==============================
+// 🧾 SISTEMA
+// ==============================
+
+let pedido={
+    cliente:{},
+    pizzas:[],
+    refri:[],
+    pagamento:"",
+    entrega:""
+};
+
+let contadorPizza=0;
+let contadorRefri=0;
+
+function trocar(a,b){
+document.getElementById(a).classList.add("hidden");
+document.getElementById(b).classList.remove("hidden");
+}
+
+function salvarCliente(){
+pedido.cliente.nome=nome.value;
+pedido.cliente.end=end.value;
+trocar("step1","step2");
+}
+
+function adicionarPizza(){
+contadorPizza++;
+
+const div = document.createElement("div");
+div.className = "card p-3 mb-3";
+
+div.innerHTML = `
+<h5>Pizza ${contadorPizza}</h5>
+
+<select id="tipo${contadorPizza}" class="form-select mb-2" onchange="alterarTipo(${contadorPizza})">
+<option value="inteira">Inteira</option>
+<option value="meio">Meio a meio</option>
+</select>
+
+<select id="s1_${contadorPizza}" class="form-select mb-2">${opcoesSabores()}</select>
+
+<div id="sabor2_${contadorPizza}" class="hidden">
+<select id="s2_${contadorPizza}" class="form-select mb-2">${opcoesSabores()}</select>
+</div>
+
+<select id="borda_${contadorPizza}" class="form-select mb-2">${opcoesBordas()}</select>
+
+<input id="obs_${contadorPizza}" class="form-control" placeholder="Observação">
+`;
+
+document.getElementById("sabores").appendChild(div);
+}
+
+function alterarTipo(id){
+let tipo=document.getElementById("tipo"+id).value;
+document.getElementById("sabor2_"+id).classList.toggle("hidden",tipo!=="meio");
+}
+
+function salvarSabores(){
+
+pedido.pizzas=[];
+
+for(let i=1;i<=contadorPizza;i++){
+if(!document.getElementById("tipo"+i)) continue;
+
+let tipo=document.getElementById("tipo"+i).value;
+let s1=getSabor(document.getElementById("s1_"+i).value);
+let s2=tipo==="meio"?getSabor(document.getElementById("s2_"+i).value):null;
+let borda=getBorda(document.getElementById("borda_"+i).value);
+
+pedido.pizzas.push({tipo,s1,s2,borda,obs:document.getElementById("obs_"+i).value});
+}
+
+trocar("step2","step3");
+}
+
+function adicionarRefri(){
+contadorRefri++;
+
+const div = document.createElement("div");
+div.className="card p-3 mb-2";
+
+div.innerHTML=`<select id="refri_${contadorRefri}" class="form-select">${opcoesRefri()}</select>`;
+
+document.getElementById("listaRefri").appendChild(div);
+}
+
+function salvarRefri(){
+
+pedido.refri=[];
+
+for(let i=1;i<=contadorRefri;i++){
+let el=document.getElementById("refri_"+i);
+if(el) pedido.refri.push(getRefri(el.value));
+}
+
+trocar("step3","step5");
+}
+
+function salvarFinal(){
+pedido.entrega=document.getElementById("tipoEntrega").value;
+pedido.pagamento=document.getElementById("formaPagamento").value;
+
+gerarResumo();
+trocar("step5","step4");
+}
+
+function gerarResumo(){
+
+let msg="🍕 *Pedido - Pizzaria da Villa*%0A%0A";
+msg+="*Cliente:* "+pedido.cliente.nome+"%0A";
+msg+="*Endereço:* "+pedido.cliente.end+"%0A%0A";
+
+pedido.pizzas.forEach((p,i)=>{
+
+msg+="*Pizza "+(i+1)+"*%0A";
+
+let precoPizza=p.tipo==="meio"?Math.max(p.s1.preco,p.s2.preco):p.s1.preco;
+
+msg+="• "+p.s1.nome+(p.s2?" / "+p.s2.nome:"")+" (R$ "+precoPizza.toFixed(2).replace('.',',')+")%0A";
+msg+="• Borda: "+p.borda.nome+" (R$ "+p.borda.preco.toFixed(2).replace('.',',')+")%0A";
+
+if(p.obs) msg+="• Obs: "+p.obs+"%0A";
+
+msg+="%0A";
+});
+
+msg+="*Refrigerantes:*%0A";
+
+pedido.refri.forEach(r=>{
+msg+="• "+r.nome+" (R$ "+r.preco.toFixed(2).replace('.',',')+")%0A";
+});
+
+msg+="%0A";
+msg+="*Entrega:* "+pedido.entrega+"%0A";
+msg+="*Pagamento:* "+pedido.pagamento+"%0A";
+
+resumo.innerHTML=decodeURIComponent(msg.replace(/%0A/g,"<br>"));
+window.msgFinal=msg;
+}
+
+function enviarWhats(){
+window.open("https://wa.me/5511980792935?text="+window.msgFinal);
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div class="header">🍕 Pizzaria da Villa</div>
+
+<div class="container container-box">
+
+<div id="step1" class="card p-4">
+<input id="nome" class="form-control mb-2" placeholder="Nome">
+<input id="end" class="form-control mb-2" placeholder="Endereço">
+<button class="btn btn-danger w-100" onclick="salvarCliente()">Continuar</button>
+</div>
+
+<div id="step2" class="hidden">
+<div id="sabores"></div>
+<button class="btn btn-light w-100 mb-2" onclick="adicionarPizza()">➕ Pizza</button>
+<button class="btn btn-success w-100" onclick="salvarSabores()">Continuar</button>
+</div>
+
+<div id="step3" class="card p-4 hidden">
+<div id="listaRefri"></div>
+<button class="btn btn-light w-100 mb-2" onclick="adicionarRefri()">➕ Refri</button>
+<button class="btn btn-danger w-100" onclick="salvarRefri()">Continuar</button>
+</div>
+
+<div id="step5" class="card p-4 hidden">
+
+<h5>🚚 Tipo do Pedido</h5>
+<select id="tipoEntrega" class="form-select mb-3">
+<option>Retirar no balcão</option>
+<option>Entrega em casa</option>
+</select>
+
+<h5>💳 Forma de Pagamento</h5>
+<select id="formaPagamento" class="form-select mb-3">
+<option>PIX</option>
+<option>Dinheiro</option>
+<option>Cartão de Crédito</option>
+<option>Cartão de Débito</option>
+</select>
+
+<button class="btn btn-success w-100" onclick="salvarFinal()">Finalizar Pedido</button>
+
+</div>
+
+<div id="step4" class="card p-4 hidden">
+<div id="resumo"></div>
+<button class="btn btn-success w-100" onclick="enviarWhats()">Enviar Pedido</button>
+</div>
+
+</div>
+
+</body>
+</html>
