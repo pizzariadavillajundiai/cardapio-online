@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pizzaria da Villa - Jundiai V6 🍕</title>
+<title>Pizzaria da Villa - Jundiai V7 🍕</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -18,6 +18,8 @@ input, select { height: 50px; font-size: 16px; }
 </style>
 
 <script>
+
+
 
 // ==============================
 // 📦 DADOS
@@ -89,8 +91,20 @@ document.getElementById(b).classList.remove("hidden");
 }
 
 function salvarCliente(){
-pedido.cliente.nome=nome.value;
-pedido.cliente.end=end.value;
+
+if(!nome.value.trim()){
+alert("Digite seu nome");
+return;
+}
+
+if(!end.value.trim()){
+alert("Digite seu endereço");
+return;
+}
+
+pedido.cliente.nome = nome.value;
+pedido.cliente.end = end.value;
+
 trocar("step1","step2");
 
 if(contadorPizza===0){
@@ -188,7 +202,7 @@ trocar("step5","step4");
 
 function gerarResumo(){
 
-let msg="🍕 *Pedido - Pizzaria da Villa*%0A%0A";
+let msg=" *Pedido - Pizzaria da Villa*%0A%0A";
 msg+="*Cliente:* "+pedido.cliente.nome+"%0A";
 msg+="*Endereço:* "+pedido.cliente.end+"%0A%0A";
 
