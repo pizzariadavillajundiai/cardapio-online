@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pizzaria da Villa - Jundiai V8 🍕</title>
+<title>Pizzaria da Villa Jundiai - V9🍕</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -18,8 +18,6 @@ input, select { height: 50px; font-size: 16px; }
 </style>
 
 <script>
-
-
 
 // ==============================
 // 📦 DADOS
@@ -115,6 +113,35 @@ document.getElementById(a).classList.add("hidden");
 document.getElementById(b).classList.remove("hidden");
 }
 
+// ==============================
+// 💰 PREÇO EM TEMPO REAL
+// ==============================
+
+function atualizarPreco(id){
+
+let tipo = document.getElementById("tipo"+id).value;
+let s1 = getSabor(document.getElementById("s1_"+id).value);
+let s2 = tipo==="meio" ? getSabor(document.getElementById("s2_"+id).value) : null;
+let borda = getBorda(document.getElementById("borda_"+id).value);
+
+let preco = 0;
+
+if(tipo==="meio"){
+    preco = (s1.preco + (s2 ? s2.preco : 0)) / 2;
+}else if(tipo==="broto"){
+    preco = s1.preco * 0.75;
+}else{
+    preco = s1.preco;
+}
+
+preco += borda.preco;
+
+document.getElementById("preco_"+id).innerText =
+"Preço dessa escolha:  R$ " + preco.toFixed(2).replace('.',',');
+}
+
+// ==============================
+
 function salvarCliente(){
 
 if(!nome.value.trim()){
@@ -137,6 +164,8 @@ adicionarPizza();
 }
 }
 
+// ==============================
+
 function adicionarPizza(){
 contadorPizza++;
 
@@ -147,33 +176,52 @@ div.innerHTML=`
 <h5>Pizza ${contadorPizza}</h5>
 
 <label class="form-label">Tipo</label>
-<select id="tipo${contadorPizza}" class="form-select mb-2" onchange="alterarTipo(${contadorPizza})">
+<select id="tipo${contadorPizza}" class="form-select mb-2"
+onchange="alterarTipo(${contadorPizza}); atualizarPreco(${contadorPizza})">
 <option value="inteira">Inteira</option>
 <option value="meio">Meio a meio</option>
+<option value="broto">Broto</option>
 </select>
 
 <label class="form-label">Sabor</label>
-<select id="s1_${contadorPizza}" class="form-select mb-2">${opcoesSabores()}</select>
+<select id="s1_${contadorPizza}" class="form-select mb-2"
+onchange="atualizarPreco(${contadorPizza})">
+${opcoesSabores()}
+</select>
 
 <div id="sabor2_${contadorPizza}" class="hidden">
 <label class="form-label">Segundo sabor</label>
-<select id="s2_${contadorPizza}" class="form-select mb-2">${opcoesSabores()}</select>
+<select id="s2_${contadorPizza}" class="form-select mb-2"
+onchange="atualizarPreco(${contadorPizza})">
+${opcoesSabores()}
+</select>
 </div>
 
 <label class="form-label">Borda</label>
-<select id="borda_${contadorPizza}" class="form-select mb-2">${opcoesBordas()}</select>
+<select id="borda_${contadorPizza}" class="form-select mb-2"
+onchange="atualizarPreco(${contadorPizza})">
+${opcoesBordas()}
+</select>
 
 <label class="form-label">Observação</label>
 <input id="obs_${contadorPizza}" class="form-control" placeholder="Ex: sem cebola">
+<br>
+<p id="preco_${contadorPizza}" style="font-weight:bold; color:green;">
+Preço dessa escolha: R$ 0,00
+</p>
 `;
 
 document.getElementById("sabores").appendChild(div);
 }
 
+// ==============================
+
 function alterarTipo(id){
 let tipo=document.getElementById("tipo"+id).value;
 document.getElementById("sabor2_"+id).classList.toggle("hidden",tipo!=="meio");
 }
+
+// ==============================
 
 function salvarSabores(){
 pedido.pizzas=[];
@@ -191,6 +239,8 @@ pedido.pizzas.push({tipo,s1,s2,borda,obs:document.getElementById("obs_"+i).value
 
 trocar("step2","step3");
 }
+
+// ==============================
 
 function adicionarRefri(){
 contadorRefri++;
@@ -217,6 +267,8 @@ if(el) pedido.refri.push(getRefri(el.value));
 trocar("step3","step5");
 }
 
+// ==============================
+
 function salvarFinal(){
 pedido.entrega=document.getElementById("tipoEntrega").value;
 pedido.pagamento=document.getElementById("formaPagamento").value;
@@ -224,6 +276,8 @@ pedido.pagamento=document.getElementById("formaPagamento").value;
 gerarResumo();
 trocar("step5","step4");
 }
+
+// ==============================
 
 function gerarResumo(){
 
@@ -234,16 +288,35 @@ msg+="*Endereço:* "+pedido.cliente.end+"%0A%0A";
 pedido.pizzas.forEach((p,i)=>{
 msg+="*Pizza "+(i+1)+"*%0A";
 
-let precoPizza = p.tipo==="meio"
-    ? (p.s1.preco + p.s2.preco) / 2
-    : p.s1.preco;
+let precoPizza;
 
-msg+="• "+p.s1.nome+(p.s2?" / "+p.s2.nome:"")+" (R$ "+precoPizza.toFixed(2).replace('.',',')+")%0A";
+// cálculo do preço
+if(p.tipo==="meio"){
+    precoPizza = (p.s1.preco + p.s2.preco) / 2;
+}else if(p.tipo==="broto"){
+    precoPizza = p.s1.preco * 0.75;
+}else{
+    precoPizza = p.s1.preco;
+}
+
+// 🆕 TEXTO DO TIPO
+let tipoTexto = "";
+
+if(p.tipo==="meio"){
+    tipoTexto = "Meio a meio - ";
+}else if(p.tipo==="broto"){
+    tipoTexto = "Broto - ";
+}else{
+    tipoTexto = "Inteira - ";
+}
+
+// 🆕 LINHA CORRIGIDA
+msg+="• "+tipoTexto + p.s1.nome+(p.s2?" / "+p.s2.nome:"")+" (R$ "+precoPizza.toFixed(2).replace('.',',')+")%0A";
+
 msg+="• Borda: "+p.borda.nome+" (R$ "+p.borda.preco.toFixed(2).replace('.',',')+")%0A";
 if(p.obs) msg+="• Obs: "+p.obs+"%0A";
 msg+="%0A";
 });
-
 
 msg+="*Refrigerantes:*%0A";
 pedido.refri.forEach(r=>{ msg+="• "+r.nome+" (R$ "+r.preco.toFixed(2).replace('.',',')+")%0A"; });
@@ -303,10 +376,8 @@ window.open("https://wa.me/5511980792935?text="+window.msgFinal);
 <select id="formaPagamento" class="form-select mb-3">
 <option>Cartão de Débito</option>
 <option>Cartão de Crédito</option>
-
 <option>PIX</option>
 <option>Dinheiro</option>
-
 </select>
 
 <p style="font-size:14px; color:#555; text-align:center;">
