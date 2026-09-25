@@ -11,7 +11,7 @@
     gtag('config', 'G-DMFFWT5WMP');
   </script>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#751C20">
   <meta name="description" content="Peça sua pizza na Pizzaria da Villa. Baixe nosso aplicativo ou faça seu pedido online.">
@@ -233,28 +233,18 @@
     </section>
 
     <section class="card">
-      <div class="app-badge">📱 EXCLUSIVO PARA ANDROID</div>
-      <div class="app-title">Peça pelo nosso aplicativo</div>
+      <div class="app-badge">🍕 PEÇA SUA PIZZA</div>
+      <div class="app-title">Seu pedido está a um toque</div>
       <div class="app-text">
-        Tenha o cardápio na palma da mão e faça seu pedido de forma rápida e prática.
+        Acesse nosso cardápio e faça seu pedido de forma rápida e prática.
       </div>
 
-      <!-- SUBSTITUA este link pelo endereço do seu aplicativo na Google Play -->
-      <a id="appButton"
+      <a id="mainButton"
          class="btn btn-app"
-         href="https://play.google.com/store/apps/details?id=com.wabiz.delivery.pizzariadavillajundiai&hl=pt_BR"
+         href="#"
          target="_blank"
          rel="noopener">
-        ▶️ Baixar aplicativo
-      </a>
-
-      <div class="divider">ou</div>
-
-      <a class="btn btn-site"
-         href="https://pizzariadavillajundiai.wabiz.delivery/"
-         target="_blank"
-         rel="noopener">
-        🍕 Pedir pelo site
+        📲 Baixar aplicativo
       </a>
 
       <div class="benefits">
@@ -292,35 +282,28 @@
       Troque APP_URL abaixo pelo link real da Google Play.
     */
 
-    const APP_URL = "https://play.google.com/store/apps/details?id=com.wabiz.delivery.pizzariadavillajundiai&hl=pt_BR"; // <-- COLOQUE AQUI O LINK DO SEU APP
+    const APP_URL = "https://play.google.com/store/apps/details?id=com.wabiz.delivery.pizzariadavillajundiai&hl=pt_BR";
     const SITE_URL = "https://pizzariadavillajundiai.wabiz.delivery/";
 
     const ua = navigator.userAgent || navigator.vendor || window.opera;
     const isAndroid = /android/i.test(ua);
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
 
-    const appButton = document.getElementById("appButton");
+    const mainButton = document.getElementById("mainButton");
     const fallback = document.getElementById("fallback");
 
-    appButton.href = APP_URL;
-
-    // No iPhone, deixa claro que o aplicativo é Android.
-    if (isIOS) {
-      appButton.textContent = "📱 Aplicativo disponível para Android";
-      appButton.href = "#";
-      appButton.removeAttribute("target");
-      appButton.addEventListener("click", function(e) {
-        e.preventDefault();
-        document.querySelector(".app-text").textContent =
-          "No momento, nosso aplicativo está disponível somente para Android. Você pode fazer seu pedido pelo site.";
-        document.querySelector(".btn-site").scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-      fallback.textContent = "Você está no iPhone. Faça seu pedido pelo site.";
-    }
-
-    // No Android, reforça a chamada principal.
+    /*
+      FLUXO DO BOTÃO:
+      Android  → Google Play
+      iPhone/PC → Wabiz
+    */
     if (isAndroid) {
+      mainButton.href = APP_URL;
+      mainButton.textContent = "📲 Baixar aplicativo";
       fallback.textContent = "Você está no Android. Baixe o app e peça sua pizza.";
+    } else {
+      mainButton.href = SITE_URL;
+      mainButton.textContent = "🍕 Pedir pelo site";
+      fallback.textContent = "Faça seu pedido online de forma rápida e fácil.";
     }
   </script>
 </body>
